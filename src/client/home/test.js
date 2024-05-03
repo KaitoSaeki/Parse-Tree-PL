@@ -14,58 +14,58 @@ const lexer = (input) => {
     }
 
     const currentChar = input[position];
-while (loop){
-    if (/\s/.test(currentChar)) {
-      advance();
-      return getNextToken();
-    }
-
-    if (/^[a-zA-Z]+$/.test(currentChar)) {
-      let value = '';
-
-      while (position < input.length && /^[a-zA-Z]+$/.test(input[position])) {
-        value += input[position];
+    while (loop) {
+      if (/\s/.test(currentChar)) {
         advance();
+        return getNextToken();
       }
 
-      return Token('ID', value);
-    }
+      if (/^[a-zA-Z]+$/.test(currentChar)) {
+        let value = '';
 
-    if (/^\d+$/.test(currentChar)) {
-      let value = '';
+        while (position < input.length && /^[a-zA-Z]+$/.test(input[position])) {
+          value += input[position];
+          advance();
+        }
 
-      while (position < input.length && /^\d+$/.test(input[position])) {
-        value += input[position];
-        advance();
+        return Token('ID', value);
       }
 
-      return Token('cons', parseInt(value));
-    }
+      if (/^\d+$/.test(currentChar)) {
+        let value = '';
 
-    if (['+', '-', '/', '*'].includes(currentChar)) {
+        while (position < input.length && /^\d+$/.test(input[position])) {
+          value += input[position];
+          advance();
+        }
+
+        return Token('cons', parseInt(value));
+      }
+
+      if (['+', '-', '/', '*'].includes(currentChar)) {
+        advance();
+        return Token('OPERATOR', currentChar);
+      }
+
+      if (currentChar === '=') {
+        advance();
+        return Token('EQUALS', '=');
+      }
+
+      if (currentChar === '(' || currentChar === ')') {
+        advance();
+        return Token('PARENTHESIS', currentChar);
+      }
+
+      if (position > input.length) {
+        break;
+      }
+
+      // Return an error token for unknown characters
       advance();
-      return Token('OPERATOR', currentChar);
+      return Token('ERROR', currentChar);
     }
-
-    if (currentChar === '=') {
-      advance();
-      return Token('EQUALS', '=');
-    }
-    
-    if (currentChar === '(' || currentChar === ')') {
-      advance();
-      return Token('PARENTHESIS', currentChar);
-    }
-
-    if (position > input.length) {
-      break;
-    }
-
-    // Return an error token for unknown characters
-    advance();
-    return Token('ERROR', currentChar);
   };
-  }
   return {
     getNextToken
   };
@@ -172,18 +172,21 @@ const parser = (input) => {
 // Function to convert parse tree to array
 const parseTreeToArray = (tree) => {
   const result = [];
+
   if (tree.children) {
     result.push(tree.type);
+
     tree.children.forEach(child => {
       if (typeof child === 'object') {
         result.push(parseTreeToArray(child));
       } else {
-        result.push(child);
+        result.push(child.type + ": " + child.value); // Adjusted to include type and value
       }
     });
   } else {
     result.push(tree.type + ": " + tree.value);
   }
+
   return result;
 };
 
