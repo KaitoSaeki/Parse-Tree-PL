@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Parser Example</title>
 </head>
+<style>
+    html{
+        background: #222222;
+    }
+</style>
 <body>
   <ul id="parseResult"></ul> <!-- Unordered list to display parse result -->
 
@@ -112,44 +117,48 @@
 
         // Loop until all tokens are processed
         while (currentToken.type !== 'EOF') {
-          // Expect parentheses or ID or INT
-          if (currentToken.type === 'PARENTHESIS' && currentToken.value === '(') {
-            node.children.push({ type: 'expr', value: '(' });
-            currentToken = lexerInstance.getNextToken();
+    if (currentToken.type === 'PARENTHESIS' && currentToken.value === '(') {
+      // Create a new parent node for the nested expression
+      const nestedExprNode = { type: 'expr', children: [] };
 
-            // Check for unary operator
-            if (['+', '-'].includes(currentToken.value)) {
-              node.children.push(parseOperator());
-            }
+      // Move to the next token
+      currentToken = lexerInstance.getNextToken();
 
-            // Expect expression
-            node.children.push(parseExpr());
+      // Recursively parse the nested expression
+      const nestedExpr = parseExpr();
+      nestedExprNode.children.push({ type: 'expr', value: '(' });
 
-            // Expect operator if the next token is not a parenthesis
-            if (currentToken.type !== 'PARENTHESIS') {
-              node.children.push(parseOperator());
-            }
+      // Add the nested expression as a child of the nested expression node
+      nestedExprNode.children.push(nestedExpr);
 
-            // Expect expression
-            node.children.push(parseExpr());
+      // Add the nested expression node as a child of the current expression node
+      node.children.push(nestedExprNode);
 
-            // Expect ')'
-            if (currentToken.type === 'PARENTHESIS' && currentToken.value === ')') {
-              node.children.push({ type: 'expr', value: ')' });
-              currentToken = lexerInstance.getNextToken();
-            } else {
-              throw new Error("Expected ')'");
-            }
-          } else if (currentToken.type === 'ID' || currentToken.type === 'cons') {
-            node.children.push({ type: currentToken.type , value: currentToken.value });
-            currentToken = lexerInstance.getNextToken();
-          } else {
-            break; // Exit the loop if no more valid tokens
-          }
-        }
+      nestedExprNode.children.push({ type: 'expr', value: ')' });
+    } else if (currentToken.type === 'PARENTHESIS' && currentToken.value === ')') {
+      // Move to the next token
+      currentToken = lexerInstance.getNextToken();
 
-        return node;
-      };
+      // Finish constructing the current expression node and return it
+      return node;
+    } else if(!hasBalancedParentheses(input)){
+        throw new Error("Expected ')'");
+    } else if(isOperatorMissing(input)){
+        throw new Error("Error");
+    }else {
+      // Handle other types of tokens (ID, cons, operators, etc.)
+      // For simplicity, assuming they are parsed and added as children directly
+      node.children.push(currentToken);
+      currentToken = lexerInstance.getNextToken();
+    }
+  }
+
+  // Return the constructed expression node
+  return node;
+};
+
+
+
 
       const parseID = () => {
         if (currentToken.type === 'ID') {
@@ -210,8 +219,42 @@
       return result;
     };
 
+function isOperatorMissing(expression) {
+    // Regular expression pattern to match two consecutive operands without an operator
+    const pattern = /([a-zA-Z]+|\d+|\(|\))\s+([a-zA-Z]+|\d+|\(|\))/g;
+    
+    // Use the test method to check if the pattern matches the expression
+    return pattern.test(expression) || /(\/\/|\*\*|\+\+|--|\)\(|\(\))/g.test(expression);
+}
+
+
+function hasBalancedParentheses(str) {
+  let count = 0;
+
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '(') {
+      count++;
+    } else if (str[i] === ')') {
+      count--;
+    }
+    // If count becomes negative, it means there are more ')' than '('
+    if (count < 0) {
+      return false;
+    }
+  }
+
+  // If count is zero, it means the number of '(' and ')' are equal
+  return count === 0;
+};
+
+function isAmbiguous(input) {
+    const pattern = /[a-zA-Z0-9]+\s+[a-zA-Z0-9]+/g;
+    return pattern.test(input);
+}
     // Example usage
-    const input = "a = (2+b)";
+    const input = "a = (6+3) * 4";
+    console.log(isAmbiguous(input.replace(/^\s*[a-zA-Z]+\s*=\s*/, '')));
+    console.log(input.replace(/^\s*[a-zA-Z]+\s*=\s*/, ''));
     const parseTree = parser(input);
     const parseList = parseTreeToHTMLList(parseTree);
     document.getElementById('parseResult').appendChild(parseList); // Display the parsed result in the div
