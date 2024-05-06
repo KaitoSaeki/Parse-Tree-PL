@@ -1,0 +1,1 @@
+export const Token = (type, value) => ({ type, value });
