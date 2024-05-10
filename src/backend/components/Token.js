@@ -1,1 +1,1 @@
-export const Token = (type, value) => ({ type, value });
+export const Token = (id, type, value) => ({ id, type, value });

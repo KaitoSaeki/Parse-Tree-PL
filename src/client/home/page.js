@@ -11,8 +11,9 @@ import TextField from "@mui/material/TextField";
 import displayParseTree from "../components/ParseTree";
 import parser from "../../backend/components/parser";
 export default function page() {
-  const input = "a = (7+6) * (1-1)";
+  const input = "a = (7+6) - 1";
   const parseTree = parser(input);
+  // console.log(parseTree);
   return (
     <div>
       <Card sx={{ maxWidth: 500 }}>
@@ -46,7 +47,7 @@ export default function page() {
           </CardContent>
         </CardActionArea>
       </Card>
-      {displayParseTree(parseTree)}
+      {displayParseTree(parseTree)} 
     </div>
   );
 }
