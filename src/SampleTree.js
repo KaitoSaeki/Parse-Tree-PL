@@ -19,17 +19,35 @@ export default function sampleTree() {
                       <TreeItem itemId={index + obj.id} label={obj.type}>
                         {obj?.children ? (
                           obj?.children.map((obj, index) => (
-                            <TreeItem itemId={obj.id + index} label={obj.type}>
+                            <TreeItem itemId={index + obj.id} label={obj.value? obj.value:"expr"}>
                               {obj?.children ? (
                                 obj?.children.map((obj, index) => (
                                   <TreeItem
-                                    itemId={index + obj.id}
+                                    itemId={obj.id+index}
                                     label={obj.type}
-                                  ></TreeItem>
+                                  >
+                                    {obj?.children ? (
+                                obj?.children.map((obj, index) => (
+                                  <TreeItem
+                                    itemId={obj.id}
+                                    label={obj.value}
+                                  >
+                                    
+                                  </TreeItem>
                                 ))
                               ) : (
                                 <TreeItem
-                                  itemId={index + obj.id}
+                                  itemId={obj.id}
+                                  label={obj.value}
+                                >
+                                 
+                                </TreeItem>
+                              )}
+                                  </TreeItem>
+                                ))
+                              ) : (
+                                <TreeItem
+                                  itemId={obj.id+index}
                                   label={obj.type}
                                 >
                                   <TreeItem
@@ -41,18 +59,14 @@ export default function sampleTree() {
                             </TreeItem>
                           ))
                         ) : (
-                          <TreeItem itemId={index + obj.id} label={obj.type}>
-                            <TreeItem
-                              itemId={obj.id + index}
-                              label={obj.value}
-                            />
+                          <TreeItem itemId={index} label={obj.value}>
+                           
                           </TreeItem>
                         )}
                       </TreeItem>
                     ))
                   ) : (
-                    <TreeItem itemId={index + obj.id} label={obj.type}>
-                      <TreeItem itemId={obj.id + index} label={obj.value} />
+                    <TreeItem itemId={obj.id + index} label={obj.value}>
                     </TreeItem>
                   )}
                 </TreeItem>

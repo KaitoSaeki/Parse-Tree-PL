@@ -25,7 +25,7 @@ export default function parser(lexerData) {
   };
 
   const parseExpr = () => {
-    const node = {id:currentToken.id + "expr", type: 'expr', children: [] };
+    const node = {id:"", type: 'expr', children: [] };
 
     // Loop until all tokens are processed
     while (currentToken.type !== 'EOF') {
@@ -38,7 +38,7 @@ export default function parser(lexerData) {
 
         // Recursively parse the nested expression
         const nestedExpr = parseExpr();
-        nestedExprNode.children.push({id:currentToken.id, type: 'expr', value: '(' });
+        nestedExprNode.children.push({id:currentToken.id+"open", type: 'expr', value: '(' });
 
         // Add the nested expression as a child of the nested expression node
         nestedExprNode.children.push(nestedExpr);
@@ -46,7 +46,7 @@ export default function parser(lexerData) {
         // Add the nested expression node as a child of the current expression node
         node.children.push(nestedExprNode);
 
-        nestedExprNode.children.push({id:currentToken.id, type: 'expr', value: ')' });
+        nestedExprNode.children.push({id:currentToken.id + "close", type: 'expr', value: ')' });
       } else if (currentToken.type === 'PARENTHESIS' && currentToken.value === ')') {
         // Move to the next token
         currentToken = lexerInstance.getNextToken();

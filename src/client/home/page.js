@@ -11,7 +11,7 @@ import TextField from "@mui/material/TextField";
 import displayParseTree from "../components/ParseTree";
 import parser from "../../backend/components/parser";
 export default function page() {
-  const input = "a = (7+6) - 1";
+  const input = "a = (7+6) - (a+v) * (9+8)";
   const parseTree = parser(input);
   // console.log(parseTree);
   return (
