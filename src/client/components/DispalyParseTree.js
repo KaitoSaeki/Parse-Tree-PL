@@ -1,13 +1,14 @@
-import React from "react";
-import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
-import { TreeItem } from "@mui/x-tree-view/TreeItem";
-import { sampleObj } from "./test";
-export default function sampleTree() {
+import React from 'react';
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
+
+
+const DisplayParseTree = (sampleObj) => {
   return (
     <div>
       <SimpleTreeView
         aria-label="file system navigator"
-        sx={{ height:700, flexGrow: 1, maxWidth: 400, overflowY: "auto" }}
+        sx={{ height:"100vh", flexGrow: 1, maxWidth: 400, overflowY: "auto" }}
       >
         <TreeItem itemId={sampleObj.id} label={sampleObj.type}>
           {sampleObj?.children?.map((obj, index) => (
@@ -86,4 +87,6 @@ export default function sampleTree() {
       </SimpleTreeView>
     </div>
   );
-}
+};
+
+export default DisplayParseTree;

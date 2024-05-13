@@ -25,12 +25,13 @@ export default function parser(lexerData) {
   };
 
   const parseExpr = () => {
-    const node = {id:"", type: 'expr', children: [] };
+    const node = {id:currentToken.id, type: 'expr', children: [] };
 
     // Loop until all tokens are processed
     while (currentToken.type !== 'EOF') {
       if (currentToken.type === 'PARENTHESIS' && currentToken.value === '(') {
         // Create a new parent node for the nested expression
+        console.log(currentToken.id, currentToken.value)
         const nestedExprNode = { id:currentToken.id,  type: 'expr', children: [] };
 
         // Move to the next token
@@ -60,7 +61,7 @@ export default function parser(lexerData) {
       } else {
         // Handle other types of tokens (ID, cons, operators, etc.)
         // For simplicity, assuming they are parsed and added as children directly
-        console.log("currentToken: " + currentToken.value, currentToken.id)
+        // console.log("currentToken: " + currentToken.value, currentToken.id)
         node.children.push(currentToken);
         currentToken = lexerInstance.getNextToken();
       }
