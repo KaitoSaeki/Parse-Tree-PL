@@ -10,16 +10,16 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import DisplayParseTree from "../components/DispalyParseTree";
 import parser from "../../backend/components/parser";
+import ambiguousTest from "../../backend/components/ambiguousTest";
 export default function Page() {
   //   const input = "a = (7+6) - (a+v)";
   //   const parseTree = parser(input);
   const [expr, setExpr] = useState("A = B + c");
   const [exprData, setExprData] = useState('');
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setExpr(exprData);
-    console.log(expr);
+    // console.log(expr);
   }
 
   return (
@@ -54,6 +54,9 @@ export default function Page() {
           </CardContent>
         </CardActionArea>
       </Card>
+      <div>{ambiguousTest(expr)?
+      (<p>The Expression is Ambiguous</p>):(<p>The Expression is not Ambiguous</p>)}</div>
+       {/* {console.log(ambiguousTest(expr))}  */}
       {DisplayParseTree(parser(expr))}
     </div>
   );

@@ -1,8 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
 import SampleTree from './SampleTree';
-import TreeView from './tree-view';
-import TreeViewSamp from './TreeViewSamp';
 import Page from './client/home/Page';
 
 function App() {

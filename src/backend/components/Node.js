@@ -1,0 +1,1 @@
+export const Node = (type, left = null, right = null) => ({ type, left, right });
