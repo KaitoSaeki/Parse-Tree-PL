@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parser Example</title>
+</head>
+<style>
+    html{
+        background: #222222;
+    }
+</style>
+<body>
+  <ul id="parseResult"></ul> <!-- Unordered list to display parse result -->
+
+  <script>
+    const Token = (type, value) => ({ type, value });
+
+    const lexer = (input) => {
+      let position = 0;
+
+      const advance = () => {
+        position++;
+      };
+
+      let loop = true;
+      const getNextToken = () => {
+        if (position >= input.length) {
+          return Token('EOF', null);
+        }
+
+        const currentChar = input[position];
+        console.log(currentChar);
+        while (loop) {
+          if (/\s/.test(currentChar)) {
+            advance();
+            return getNextToken();
+          }
+
+          if (/^[a-zA-Z]+$/.test(currentChar)) {
+            let value = '';
+
+            while (position < input.length && /^[a-zA-Z]+$/.test(input[position])) {
+              value += input[position];
+              advance();
+            }
+
+            return Token('ID', value);
+          }
+
+          if (/^\d+$/.test(currentChar)) {
+            let value = '';
+
+            while (position < input.length && /^\d+$/.test(input[position])) {
+              value += input[position];
+              advance();
+            }
+
+            return Token('cons', parseInt(value));
+          }
+
+          if (['+', '-', '/', '*'].includes(currentChar)) {
+            advance();
+            return Token('OPERATOR', currentChar);
+          }
+
+          if (currentChar === '=') {
+            advance();
+            return Token('EQUALS', '=');
+          }
+
+          if (currentChar === '(' || currentChar === ')') {
+            advance();
+            return Token('PARENTHESIS', currentChar);
+          }
+
+          if (position > input.length) {
+            break;
+          }
+
+          // Return an error token for unknown characters
+          advance();
+          return Token('ERROR', currentChar);
+        }
+      };
+      return {
+        getNextToken
+      };
+    };
+
+    const parser = (input) => {
+      const lexerInstance = lexer(input);
+      let currentToken = lexerInstance.getNextToken();
+
+      const parseAssign = () => {
+        const node = { type: 'assign', children: [] };
+
+        // Expect variable name
+        node.children.push(parseID());
+
+        // Expect '='
+        if (currentToken.type === 'EQUALS') {
+          node.children.push({ type: 'EQUALS', value: currentToken.value });
+          currentToken = lexerInstance.getNextToken();
+        } else {
+          throw new Error("Expected '='");
+        }
+
+        // Expect expression
+        node.children.push(parseExpr());
+
+        return node;
+      };
+
+      const parseExpr = () => {
+        const node = { type: 'expr', children: [] };
+
+        // Loop until all tokens are processed
+        while (currentToken.type !== 'EOF') {
+    if (currentToken.type === 'PARENTHESIS' && currentToken.value === '(') {
+      // Create a new parent node for the nested expression
+      const nestedExprNode = { type: 'expr', children: [] };
+
+      // Move to the next token
+      currentToken = lexerInstance.getNextToken();
+
+      // Recursively parse the nested expression
+      const nestedExpr = parseExpr();
+      nestedExprNode.children.push({ type: 'expr', value: '(' });
+
+      // Add the nested expression as a child of the nested expression node
+      nestedExprNode.children.push(nestedExpr);
+
+      // Add the nested expression node as a child of the current expression node
+      node.children.push(nestedExprNode);
+
+      nestedExprNode.children.push({ type: 'expr', value: ')' });
+    } else if (currentToken.type === 'PARENTHESIS' && currentToken.value === ')') {
+      // Move to the next token
+      currentToken = lexerInstance.getNextToken();
+
+      // Finish constructing the current expression node and return it
+      return node;
+    } else if(!hasBalancedParentheses(input)){
+        throw new Error("Expected ')'");
+    } else if(isOperatorMissing(input)){
+        throw new Error("Error");
+    }else {
+      // Handle other types of tokens (ID, cons, operators, etc.)
+      // For simplicity, assuming they are parsed and added as children directly
+      node.children.push(currentToken);
+      currentToken = lexerInstance.getNextToken();
+    }
+  }
+
+  // Return the constructed expression node
+  return node;
+};
+
+
+
+
+      const parseID = () => {
+        if (currentToken.type === 'ID') {
+          const node = { type: 'ID', value: currentToken.value };
+          currentToken = lexerInstance.getNextToken();
+          return node;
+        } else {
+          throw new Error("Expected ID");
+        }
+      };
+
+      const parseINT = () => {
+        if (currentToken.type === 'cons') {
+          const node = { type: 'cons', value: currentToken.value };
+          currentToken = lexerInstance.getNextToken();
+          return node;
+        } else {
+          throw new Error("Expected cons");
+        }
+      };
+
+      const parseOperator = () => {
+        if (currentToken.type === 'OPERATOR') {
+          const node = { type: 'OPERATOR', value: currentToken.value };
+          currentToken = lexerInstance.getNextToken();
+          return node;
+        } else {
+          throw new Error("Expected OPERATOR");
+        }
+      };
+
+      const parseTree = () => {
+        return parseAssign();
+      };
+
+      return parseTree();
+    };
+
+    // Function to convert parse tree to HTML unordered list
+    const parseTreeToHTMLList = (tree) => {
+      const result = document.createElement('ul');
+
+      if (tree.children) {
+        const listItem = document.createElement('li');
+        listItem.textContent = tree.type;
+        result.appendChild(listItem);
+
+        tree.children.forEach(child => {
+          const childItem = parseTreeToHTMLList(child);
+          result.appendChild(childItem);
+        });
+      } else {
+        const listItem = document.createElement('li');
+        listItem.textContent = tree.type + ": " + tree.value;
+        result.appendChild(listItem);
+      }
+
+      return result;
+    };
+
+function isOperatorMissing(expression) {
+    // Regular expression pattern to match two consecutive operands without an operator
+    const pattern = /([a-zA-Z]+|\d+|\(|\))\s+([a-zA-Z]+|\d+|\(|\))/g;
+    
+    // Use the test method to check if the pattern matches the expression
+    return pattern.test(expression) || /(\/\/|\*\*|\+\+|--|\)\(|\(\))/g.test(expression);
+}
+
+
+function hasBalancedParentheses(str) {
+  let count = 0;
+
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '(') {
+      count++;
+    } else if (str[i] === ')') {
+      count--;
+    }
+    // If count becomes negative, it means there are more ')' than '('
+    if (count < 0) {
+      return false;
+    }
+  }
+
+  // If count is zero, it means the number of '(' and ')' are equal
+  return count === 0;
+};
+
+function isAmbiguous(input) {
+    const pattern = /[a-zA-Z0-9]+\s+[a-zA-Z0-9]+/g;
+    return pattern.test(input);
+}
+    // Example usage
+    const input = "a = (6+3) * 4";
+    console.log(isAmbiguous(input.replace(/^\s*[a-zA-Z]+\s*=\s*/, '')));
+    console.log(input.replace(/^\s*[a-zA-Z]+\s*=\s*/, ''));
+    const parseTree = parser(input);
+    const parseList = parseTreeToHTMLList(parseTree);
+    document.getElementById('parseResult').appendChild(parseList); // Display the parsed result in the div
+  </script>
+</body>
+</html>
