@@ -1,89 +1,115 @@
 import React from 'react';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
-import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem';
+import { styled, alpha } from '@mui/material/styles';
 
 
+const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
+  color:
+    theme.palette.mode === 'light'
+      ? theme.palette.white
+      : theme.palette.white[200],
+  [`& .${treeItemClasses.content}`]: {
+    borderRadius: theme.spacing(0.5),
+    padding: theme.spacing(0.5, 1),
+    margin: theme.spacing(0.2, 0),
+    [`& .${treeItemClasses.label}`]: {
+      fontSize: '1rem',
+      fontWeight: 500,
+    },
+  },
+  [`& .${treeItemClasses.iconContainer}`]: {
+    borderRadius: '50%',
+    backgroundColor:
+      theme.palette.mode === 'light'
+        ? alpha(theme.palette.primary.main, 0.8)
+        : theme.palette.primary.dark,
+    color: theme.palette.mode === 'dark' && theme.palette.primary.contrastText,
+    padding: theme.spacing(0, 1.2),
+  },
+}));
 const DisplayParseTree = (sampleObj) => {
   return (
     <div>
       <SimpleTreeView
-        aria-label="file system navigator"
-        sx={{ height:"100vh", flexGrow: 1, maxWidth: 400, overflowY: "auto" }}
+        aria-label="customized"
+        defaultExpandedItems={['1']}
+        sx={{flexGrow: 1, maxWidth: 400, overflowY: "auto" }}
       >
-        <TreeItem itemId={sampleObj.id} label={sampleObj.type}>
+        <StyledTreeItem itemId={sampleObj.id} label={sampleObj.type}>
           {sampleObj?.children?.map((obj, index) => (
             <React.Fragment key={index + obj.id}>
               {obj?.children ? (
-                <TreeItem itemId={obj.id + index} label={obj.type}>
+                <StyledTreeItem itemId={obj.id + index} label={obj.type}>
                   {obj?.children ? (
                     obj?.children.map((obj, index) => (
-                      <TreeItem itemId={index + obj.id} label={obj.type}>
+                      <StyledTreeItem itemId={index + obj.id} label={obj.type}>
                         {obj?.children?(
                           obj?.children.map((obj, index) => (
                             (obj.value !== '(' && obj.value !== ')') ?(
-                              <TreeItem itemId={index + obj.id} label={obj.value? obj.value:"expr"}>
+                              <StyledTreeItem itemId={index + obj.id} label={obj.value? obj.value:"expr"}>
                               {obj?.children ? (
                                 obj?.children.map((obj, index) => (
-                                  <TreeItem
+                                  <StyledTreeItem
                                     itemId={obj.id+index}
                                     label={obj.type}
                                   >
                                     {obj?.children ? (
                                 obj?.children.map((obj, index) => (
-                                  <TreeItem
+                                  <StyledTreeItem
                                     itemId={obj.id}
                                     label={obj.value}
                                   >
                                     
-                                  </TreeItem>
+                                  </StyledTreeItem>
                                 ))
                               ) : (
-                                <TreeItem
+                                <StyledTreeItem
                                   itemId={obj.id}
                                   label={obj.value}
                                 >
                                  
-                                </TreeItem>
+                                </StyledTreeItem>
                               )}
-                                  </TreeItem>
+                                  </StyledTreeItem>
                                 ))
                               ) : (
-                                <TreeItem
+                                <StyledTreeItem
                                   itemId={obj.id+index}
                                   label={obj.type}
                                 >
-                                  <TreeItem
+                                  <StyledTreeItem
                                     itemId={obj.id + index}
                                     label={obj.value}
                                   />
-                                </TreeItem>
+                                </StyledTreeItem>
                               )}
-                            </TreeItem>
+                            </StyledTreeItem>
                             ):
-                            (<TreeItem itemId={obj.id+index} label={obj.value}>
+                            (<StyledTreeItem itemId={obj.id+index} label={obj.value}>
                            
-                              </TreeItem>)
+                              </StyledTreeItem>)
                           ))
                         ) : (
-                          <TreeItem itemId={obj.id + index} label={obj.value}>
+                          <StyledTreeItem itemId={obj.id + index} label={obj.value}>
                            
-                          </TreeItem>
+                          </StyledTreeItem>
                         )}
-                      </TreeItem>
+                      </StyledTreeItem>
                     ))
                   ) : (
-                    <TreeItem itemId={obj.id + index} label={obj.value}>
-                    </TreeItem>
+                    <StyledTreeItem itemId={obj.id + index} label={obj.value}>
+                    </StyledTreeItem>
                   )}
-                </TreeItem>
+                </StyledTreeItem>
               ) : (
-                <TreeItem itemId={index + obj.id} label={obj.type}>
-                  <TreeItem itemId={obj.id + index} label={obj.value} />
-                </TreeItem>
+                <StyledTreeItem itemId={index + obj.id} label={obj.type}>
+                  <StyledTreeItem itemId={obj.id + index} label={obj.value} />
+                </StyledTreeItem>
               )}
             </React.Fragment>
           ))}
-        </TreeItem>
+        </StyledTreeItem>
       </SimpleTreeView>
     </div>
   );
